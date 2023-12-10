@@ -1,47 +1,48 @@
-import re
+import argparse
 
-try:
-    with open('input.txt', 'r') as file:
-        elves = file.read().split('\n')
+digits = {
+    "zero": 0,
+    "one": 1,
+    "two": 2,
+    "three": 3,
+    "four": 4,
+    "five": 5,
+    "six": 6,
+    "seven": 7,
+    "eight": 8,
+    "nine": 9,
+}
 
-        total_points = 0
-        keys = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-        values = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
+def process(lines, part_b):
+    total_sum = 0
+    for s in lines:
+        first, last = -1, -1
+        for i in range(len(s)):
+            if '0' <= s[i] <= '9':
+                digit = int(s[i])
+                if first == -1:
+                    first = digit
+                last = digit
+            elif part_b:
+                for string_digit, digit in digits.items():
+                    if i + len(string_digit) <= len(s) and s[i:i + len(string_digit)] == string_digit:
+                        if first == -1:
+                            first = digit
+                        last = digit
+                        break
+        total_sum += first * 10 + last
+    return total_sum
 
-        for elv in elves:
-            first_digit = ""
-            last_digit = ""
-            numeric = ""
-            digit = -1
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-inputFile", default="input.txt", help="Relative file path to use as input.")
+    args = parser.parse_args()
 
-            for char in elv:
-                if '1' <= char <= '9':
-                    numeric = ""
-                    digit = -1
-                    if first_digit == '':
-                        first_digit = char
-                    last_digit = char
-                else:
-                    numeric += char
-                    if len(numeric) >= 3:
-                        for x, value in enumerate(values):
-                            if value in numeric:
-                                digit = keys[x]
-                                if numeric.endswith(value):
-                                    last_digit = keys[x]
+    with open(args.inputFile, 'r') as file:
+        lines = file.read().splitlines()
 
-                        if digit > 0:
-                            if first_digit == '':
-                                first_digit = str(digit)
-                            if last_digit == "":
-                                last_digit = str(digit)
-                            digit = -1
+    print(process(lines, False))
+    print(process(lines, True))
 
-            # Check if both first_digit and last_digit are not empty before converting to int
-            if first_digit and last_digit:
-                total_points += int(str(first_digit) + str(last_digit))
-
-        print(total_points)
-
-except Exception as err:
-    print("error", err)
+if __name__ == "__main__":
+    main()
